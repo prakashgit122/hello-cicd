@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+
+    stages {
+        stage("Checkout") {
+           steps {
+                git branch: 'master',
+                 url: 'https://github.com/prakashgit122/hello-cicd.git'
+           }
+        }
+        stage("Build") {
+            steps {
+                dir('docker-cicd') {
+                    bat 'npm install'
+                }
+            }
+        }
+        stage("Test") {
+            steps {
+                dir('docker-cicd') {
+                    bat 'npm test'
+                }
+            }
+        }
+        stage("Docker build") {
+            steps {
+                dir('docker-cicd') {
+                bat 'docker build -t dockerp11/docker-cicd:v1 .' 
+            }
+        }
+        stage("Docker Push") {
+            steps {
+               withCredentials([usernamePassword(
+                credentialsId: 'docker-hub-creds',
+                usernameVariable: 'DOCKER_USER',
+                passwordVariable: 'DOCKER_PASS'
+            )]) {
+                 bat 'powershell -NoProfile -NonInteractive -Command "$env:DOCKER_PASS | docker login -u $env:DOCKER_USER --password-stdin"'
+                  bat 'docker push dockerp11/docker-cicd:v1'
+              }
+            }
+        }
+    }
+}
