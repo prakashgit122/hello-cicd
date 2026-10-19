@@ -28,6 +28,7 @@ pipeline {
                 bat 'docker build -t dockerp11/docker-cicd:v1 .' 
             }
         }
+    }   
         stage("Docker Push") {
             steps {
                withCredentials([usernamePassword(
